@@ -6,6 +6,8 @@ interface NetworkService {
 
     suspend fun getProducts(category: String?): ResultWrapper<List<Product>>
 
+    suspend fun getCategory(): ResultWrapper<List<String>>
+
 }
 
 sealed class ResultWrapper<out T>{
