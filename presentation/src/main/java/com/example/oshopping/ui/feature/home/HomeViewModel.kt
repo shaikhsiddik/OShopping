@@ -18,44 +18,42 @@ class HomeViewModel(private val getProductUseCase: GetProductUseCase) : ViewMode
 
     init {
 
-        getProduct()
+        getAllProduct()
 
     }
 
-    fun getProduct(){
-
+    private fun getAllProduct(){
         viewModelScope.launch {
+            _uiState.value = HomeScreenUiEvents.Loading
+            val featureProducts = getProduct("electronics")
+            val popularProducts = getProduct("jewelery")
+            if (featureProducts.isEmpty() || popularProducts.isEmpty()){
+                _uiState.value = HomeScreenUiEvents.Error("Something went wrong")
+                return@launch
+            }
+            _uiState.value = HomeScreenUiEvents.Success(featureProducts, popularProducts)
+        }
+    }
 
-            getProductUseCase.getProductExecute().let { result ->
+    private suspend fun getProduct(category: String?): List<Product>{
+
+            getProductUseCase.getProductExecute(category).let { result ->
 
                 when (result) {
 
                     is ResultWrapper.Success -> {
 
-                        val data = result.value
-
-                        _uiState.value = HomeScreenUiEvents.Success(data)
+                        return result.value
 
                     }
 
                     is ResultWrapper.Failure -> {
 
-                        val data = result.error
-
-                        _uiState.value = HomeScreenUiEvents.Error(data.message ?: "Error occurred")
-
-                    }
-
-                    else -> {
-
-                        _uiState.value = HomeScreenUiEvents.Error("An unknown error occurred")
+                       return emptyList()
 
                     }
 
                 }
-
-            }
-
 
         }
 
@@ -68,7 +66,7 @@ sealed class HomeScreenUiEvents{
 
     data object Loading: HomeScreenUiEvents()
 
-    data class Success(val data: List<Product>): HomeScreenUiEvents()
+    data class Success(val featureProducts: List<Product>, val popularProducts: List<Product>): HomeScreenUiEvents()
 
     data class Error(val message: String): HomeScreenUiEvents()
 
