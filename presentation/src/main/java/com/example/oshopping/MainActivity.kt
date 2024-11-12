@@ -4,6 +4,8 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -17,6 +19,8 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
@@ -35,6 +39,7 @@ import com.example.oshopping.navigation.ProductDetailScreen
 import com.example.oshopping.navigation.ProfileScreen
 import com.example.oshopping.navigation.productNavType
 import com.example.oshopping.ui.feature.home.HomeScreen
+import com.example.oshopping.ui.feature.product_details.ProductDetailScreen
 import com.example.oshopping.ui.theme.OShoppingTheme
 import kotlin.reflect.typeOf
 
@@ -45,12 +50,22 @@ class MainActivity : ComponentActivity() {
         setContent {
             OShoppingTheme {
 
+                val shouldShowBottomBar = remember {
+
+                    mutableStateOf(true)
+
+                }
+
                 val navController = rememberNavController()
 
                 Scaffold(modifier = Modifier.fillMaxSize(),
                     bottomBar = {
 
-                        BottomNavigationBar(navController)
+                        AnimatedVisibility(visible = shouldShowBottomBar.value, enter = fadeIn()) {
+
+                            BottomNavigationBar(navController)
+
+                        }
 
                     }) {
 
@@ -64,6 +79,8 @@ class MainActivity : ComponentActivity() {
 
                                 HomeScreen(navController)
 
+                                shouldShowBottomBar.value = true
+
                             }
 
                             composable<CartScreen> {
@@ -71,6 +88,8 @@ class MainActivity : ComponentActivity() {
                                 Box(modifier = Modifier.fillMaxSize()){
                                     Text(text = "Cart")
                                 }
+
+                                shouldShowBottomBar.value = true
 
                             }
 
@@ -80,17 +99,19 @@ class MainActivity : ComponentActivity() {
                                     Text(text = "Cart")
                                 }
 
+                                shouldShowBottomBar.value = true
+
                             }
 
                             composable<ProductDetailScreen>(
                                 typeMap = mapOf(typeOf<UiProductModel>() to productNavType)
                             ){
 
+                                shouldShowBottomBar.value = false
+
                                 val productRoute = it.toRoute<ProductDetailScreen>()
 
-                                Box(modifier = Modifier.fillMaxSize()){
-                                    Text(text = productRoute.product.title)
-                                }
+                                ProductDetailScreen(navController, productRoute.product)
 
                             }
 
