@@ -1,7 +1,11 @@
 package com.example.data.network
 
 import com.example.data.model.DataProductModel
+import com.example.data.model.response.CategoriesListResponse
+import com.example.data.model.response.ProductListResponse
+import com.example.domain.model.CategoryListModel
 import com.example.domain.model.Product
+import com.example.domain.model.ProductListModel
 import com.example.domain.network.NetworkService
 import com.example.domain.network.ResultWrapper
 import io.ktor.client.HttpClient
@@ -18,32 +22,31 @@ import io.ktor.util.InternalAPI
 @OptIn(InternalAPI::class)
 class NetworkServiceImpl(val client: HttpClient): NetworkService {
 
-    private val baseUrl = "https://fakestoreapi.com"
+    private val baseUrl = "https://ecommerce-ktor-4641e7ff1b63.herokuapp.com"
 
-    override suspend fun getProducts(category: String?): ResultWrapper<List<Product>> {
+    override suspend fun getProducts(category: Int?): ResultWrapper<ProductListModel> {
 
         val url = if (category != null) "$baseUrl/products/category/$category" else "$baseUrl/products"
 
         return makeWebRequest(
             url = Url(url),
             method = HttpMethod.Get,
-            mapper = { dataModule: List<DataProductModel> ->
-                dataModule.map {
-
-                    it.toProduct()
-
-                }
-            },
-            params = mapOf("limit" to "10")
+            mapper = { dataModule: ProductListResponse ->
+                dataModule.toProductList()
+            }
         )
     }
 
-    override suspend fun getCategory(): ResultWrapper<List<String>> {
-        val url = "$baseUrl/products/categories"
+    override suspend fun getCategory(): ResultWrapper<CategoryListModel> {
+        val url = "$baseUrl/categories"
 
-        return makeWebRequest<List<String>, List<String>>(
+        return makeWebRequest(
             url = Url(url),
-            method = HttpMethod.Get
+            method = HttpMethod.Get,
+            mapper = { categoryModule: CategoriesListResponse ->
+
+                categoryModule.toCategoriesList()
+            }
         )
     }
 

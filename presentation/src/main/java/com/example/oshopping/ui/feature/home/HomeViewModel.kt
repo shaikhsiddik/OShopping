@@ -26,8 +26,8 @@ class HomeViewModel(private val getProductUseCase: GetProductUseCase, private va
     private fun getAllProduct(){
         viewModelScope.launch {
             _uiState.value = HomeScreenUiEvents.Loading
-            val featureProducts = getProduct("electronics")
-            val popularProducts = getProduct("jewelery")
+            val featureProducts = getProduct(1)
+            val popularProducts = getProduct(2)
             val categories = getCategory()
             if (featureProducts.isEmpty() && popularProducts.isEmpty() && categories.isEmpty()){
                 _uiState.value = HomeScreenUiEvents.Error("Something went wrong")
@@ -37,7 +37,7 @@ class HomeViewModel(private val getProductUseCase: GetProductUseCase, private va
         }
     }
 
-    private suspend fun getProduct(category: String?): List<Product>{
+    private suspend fun getProduct(category: Int?): List<Product>{
 
             getProductUseCase.getProductExecute(category).let { result ->
 
@@ -45,7 +45,7 @@ class HomeViewModel(private val getProductUseCase: GetProductUseCase, private va
 
                     is ResultWrapper.Success -> {
 
-                        return result.value
+                        return result.value.product
 
                     }
 
@@ -66,7 +66,10 @@ class HomeViewModel(private val getProductUseCase: GetProductUseCase, private va
         categoryUseCase.categoryExecute().let { result ->
             when (result) {
                 is ResultWrapper.Success -> {
-                    return result.value
+                    return result.value.categories.map {
+
+                        it.title
+                    }
                 }
                 is ResultWrapper.Failure -> {
                     return emptyList()

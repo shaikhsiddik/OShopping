@@ -5,6 +5,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.BottomAppBar
@@ -17,14 +18,25 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.toRoute
+import com.example.domain.model.Product
+import com.example.oshopping.model.UiProductModel
+import com.example.oshopping.navigation.CartScreen
+import com.example.oshopping.navigation.HomeScreen
+import com.example.oshopping.navigation.ProductDetailScreen
+import com.example.oshopping.navigation.ProfileScreen
+import com.example.oshopping.navigation.productNavType
 import com.example.oshopping.ui.feature.home.HomeScreen
 import com.example.oshopping.ui.theme.OShoppingTheme
+import kotlin.reflect.typeOf
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -46,11 +58,39 @@ class MainActivity : ComponentActivity() {
                         .fillMaxSize()
                         .padding(it)) {
 
-                        NavHost(navController = navController, startDestination = "home"){
+                        NavHost(navController = navController, startDestination = HomeScreen){
 
-                            composable("home") {
+                            composable<HomeScreen>{
 
                                 HomeScreen(navController)
+
+                            }
+
+                            composable<CartScreen> {
+
+                                Box(modifier = Modifier.fillMaxSize()){
+                                    Text(text = "Cart")
+                                }
+
+                            }
+
+                            composable<ProfileScreen> {
+
+                                Box(modifier = Modifier.fillMaxSize()){
+                                    Text(text = "Cart")
+                                }
+
+                            }
+
+                            composable<ProductDetailScreen>(
+                                typeMap = mapOf(typeOf<UiProductModel>() to productNavType)
+                            ){
+
+                                val productRoute = it.toRoute<ProductDetailScreen>()
+
+                                Box(modifier = Modifier.fillMaxSize()){
+                                    Text(text = productRoute.product.title)
+                                }
 
                             }
 
@@ -80,8 +120,10 @@ fun BottomNavigationBar(navController: NavController){
 
         items.forEach { item ->
 
+            val isSelected = currentRoute?.substringBefore("?") == item.route::class.qualifiedName
+
             NavigationBarItem(
-                selected = currentRoute == item.route,
+                selected = isSelected,
                 onClick = {
                     navController.navigate(item.route)
                 },
@@ -92,7 +134,10 @@ fun BottomNavigationBar(navController: NavController){
                 },
                 icon = {
 
-                    Image(painter = painterResource(item.icon), contentDescription = null)
+                    Image(painter = painterResource(item.icon),
+                        contentDescription = null,
+                        colorFilter = ColorFilter.tint(
+                            if (isSelected) MaterialTheme.colorScheme.primary else Color.Gray))
 
                 },
                 colors = NavigationBarItemDefaults.colors().copy(
@@ -110,13 +155,13 @@ fun BottomNavigationBar(navController: NavController){
 }
 
 
-sealed class BottomNavItems(val route: String, val icon: Int, val label: String){
+sealed class BottomNavItems(val route: Any, val icon: Int, val label: String){
 
-    object Home : BottomNavItems("home", R.drawable.home, "Home")
+    object Home : BottomNavItems(HomeScreen, R.drawable.home, "Home")
 
-    object Cart : BottomNavItems("cart", R.drawable.cart, "Cart")
+    object Cart : BottomNavItems(CartScreen, R.drawable.cart, "Cart")
 
-    object Profile : BottomNavItems("profile", R.drawable.profile, "Profile")
+    object Profile : BottomNavItems(ProfileScreen, R.drawable.profile, "Profile")
 
 }
 
