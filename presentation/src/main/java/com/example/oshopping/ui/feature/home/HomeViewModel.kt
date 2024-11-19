@@ -4,13 +4,14 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.domain.model.Product
 import com.example.domain.network.ResultWrapper
+import com.example.domain.usecase.GetCategoryUseCase
 import com.example.domain.usecase.GetProductUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-class HomeViewModel(private val getProductUseCase: GetProductUseCase) : ViewModel() {
+class HomeViewModel(private val getProductUseCase: GetProductUseCase, private val categoryUseCase: GetCategoryUseCase) : ViewModel() {
 
     private val _uiState = MutableStateFlow<HomeScreenUiEvents>(HomeScreenUiEvents.Loading)
 
@@ -18,48 +19,63 @@ class HomeViewModel(private val getProductUseCase: GetProductUseCase) : ViewMode
 
     init {
 
-        getProduct()
+        getAllProduct()
 
     }
 
-    fun getProduct(){
-
+    private fun getAllProduct(){
         viewModelScope.launch {
+            _uiState.value = HomeScreenUiEvents.Loading
+            val featureProducts = getProduct(1)
+            val popularProducts = getProduct(2)
+            val categories = getCategory()
+            if (featureProducts.isEmpty() && popularProducts.isEmpty() && categories.isEmpty()){
+                _uiState.value = HomeScreenUiEvents.Error("Something went wrong")
+                return@launch
+            }
+            _uiState.value = HomeScreenUiEvents.Success(featureProducts, popularProducts,categories)
+        }
+    }
 
-            getProductUseCase.getProductExecute().let { result ->
+    private suspend fun getProduct(category: Int?): List<Product>{
+
+            getProductUseCase.getProductExecute(category).let { result ->
 
                 when (result) {
 
                     is ResultWrapper.Success -> {
 
-                        val data = result.value
-
-                        _uiState.value = HomeScreenUiEvents.Success(data)
+                        return result.value.product
 
                     }
 
                     is ResultWrapper.Failure -> {
 
-                        val data = result.error
-
-                        _uiState.value = HomeScreenUiEvents.Error(data.message ?: "Error occurred")
-
-                    }
-
-                    else -> {
-
-                        _uiState.value = HomeScreenUiEvents.Error("An unknown error occurred")
+                       return emptyList()
 
                     }
 
                 }
 
-            }
-
-
         }
 
 
+    }
+
+    private suspend fun getCategory(): List<String>{
+        categoryUseCase.categoryExecute().let { result ->
+            when (result) {
+                is ResultWrapper.Success -> {
+                    return result.value.categories.map {
+
+                        it.title
+                    }
+                }
+                is ResultWrapper.Failure -> {
+                    return emptyList()
+                }
+            }
+        }
     }
 
 }
@@ -68,7 +84,9 @@ sealed class HomeScreenUiEvents{
 
     data object Loading: HomeScreenUiEvents()
 
-    data class Success(val data: List<Product>): HomeScreenUiEvents()
+    data class Success(val featureProducts: List<Product>,
+                       val popularProducts: List<Product>,
+                       val category: List<String> = emptyList()): HomeScreenUiEvents()
 
     data class Error(val message: String): HomeScreenUiEvents()
 

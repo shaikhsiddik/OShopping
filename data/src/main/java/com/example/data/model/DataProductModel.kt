@@ -5,12 +5,12 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 class DataProductModel(
-    val id: Int,
-    val title: String,
-    val price: Double,
-    val category: String,
+    val categoryId: Int,
     val description: String,
-    val image: String
+    val id: Int,
+    val image: String,
+    val price: Double,
+    val title: String
 ){
 
     fun toProduct(): Product {
@@ -19,7 +19,7 @@ class DataProductModel(
             id = id,
             title = title,
             price = price,
-            category = category,
+            categoryId = categoryId,
             description = description,
             image = image
         )
