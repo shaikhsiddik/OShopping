@@ -112,13 +112,16 @@ fun CartScreen(navController: NavController, viewModel: CartViewModel = koinView
                 ) {
                     LazyColumn {
                         items(cartItems.value) { item ->
-                            CartItem(item = item)
+                            CartItem(item = item,
+                                onIncrement = { viewModel.incrementQuantity(it) },
+                                onDecrement = { viewModel.decrementQuantity(it) },
+                                onRemove = { viewModel.removeItem(it) })
                         }
                     }
                 }
                 if (shouldShowList) {
                     Button(
-                        onClick = { /*navController.navigate(CartSummaryScreen)*/ },
+                        onClick = { navController.navigate(CartSummaryScreen) },
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         Text(text = "Checkout")
@@ -145,7 +148,10 @@ fun CartScreen(navController: NavController, viewModel: CartViewModel = koinView
 }
 @Composable
 fun CartItem(
-    item: CartItemModel
+    item: CartItemModel,
+    onIncrement: (CartItemModel) -> Unit,
+    onDecrement: (CartItemModel) -> Unit,
+    onRemove: (CartItemModel) -> Unit
 ) {
     Row(
         modifier = Modifier
@@ -180,20 +186,20 @@ fun CartItem(
         }
         Column(verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.End) {
 
-            IconButton(onClick = { /*onRemove(item)*/ }) {
+            IconButton(onClick = {onRemove(item) }) {
                 Image(
                     painter = painterResource(id = R.drawable.ic_delete), contentDescription = null
                 )
             }
 
             Row(verticalAlignment = Alignment.CenterVertically) {
-                IconButton(onClick = { /*onIncrement(item)*/ }) {
+                IconButton(onClick = { onIncrement(item) }) {
                     Image(
                         painter = painterResource(id = R.drawable.ic_add), contentDescription = null
                     )
                 }
                 Text(text = item.quantity.toString())
-                IconButton(onClick = { /*onDecrement(item)*/ }) {
+                IconButton(onClick = { onDecrement(item) }) {
                     Image(
                         painter = painterResource(id = R.drawable.ic_subtract),
                         contentDescription = null

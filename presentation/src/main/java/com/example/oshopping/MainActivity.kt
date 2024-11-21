@@ -34,6 +34,7 @@ import androidx.navigation.toRoute
 import com.example.domain.model.Product
 import com.example.oshopping.model.UiProductModel
 import com.example.oshopping.navigation.CartScreen
+import com.example.oshopping.navigation.CartSummaryScreen
 import com.example.oshopping.navigation.HomeScreen
 import com.example.oshopping.navigation.ProductDetailScreen
 import com.example.oshopping.navigation.ProfileScreen
@@ -41,6 +42,7 @@ import com.example.oshopping.navigation.productNavType
 import com.example.oshopping.ui.feature.cart.CartScreen
 import com.example.oshopping.ui.feature.home.HomeScreen
 import com.example.oshopping.ui.feature.product_details.ProductDetailScreen
+import com.example.oshopping.ui.feature.summary.CartSummaryScreen
 import com.example.oshopping.ui.theme.OShoppingTheme
 import kotlin.reflect.typeOf
 
@@ -90,6 +92,14 @@ class MainActivity : ComponentActivity() {
 
                                 CartScreen(navController)
 
+
+                            }
+
+                            composable<CartSummaryScreen> {
+
+                                shouldShowBottomBar.value = false
+
+                                CartSummaryScreen(navController = navController)
 
                             }
 

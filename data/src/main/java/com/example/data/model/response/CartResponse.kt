@@ -9,7 +9,7 @@ data class CartResponse(
     val message: String
 ){
 
-    fun toDomainModel() = CartModel(
+    fun toCartModel() = CartModel(
         data = data.map { it.toCartItemModel() },
         message = message
     )

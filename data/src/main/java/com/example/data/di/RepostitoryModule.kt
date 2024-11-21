@@ -10,23 +10,10 @@ import org.koin.dsl.module
 
 val repositoryModule = module {
 
-    single<CategoryRepository> {
+    single<CategoryRepository> { CategoryRepositoryImpl(get()) }
 
-        CategoryRepositoryImpl(get())
+    single<ProductRepository> { ProductRepositoryImpl(get()) }
 
-    }
-
-    single<ProductRepository> {
-
-        ProductRepositoryImpl(get())
-
-    }
-
-
-    single<CartRepository> {
-
-        CartRepositoryImpl(get())
-
-    }
+    single<CartRepository> { CartRepositoryImpl(get()) }
 
 }
