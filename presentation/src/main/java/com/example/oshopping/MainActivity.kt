@@ -38,6 +38,7 @@ import com.example.oshopping.navigation.HomeScreen
 import com.example.oshopping.navigation.ProductDetailScreen
 import com.example.oshopping.navigation.ProfileScreen
 import com.example.oshopping.navigation.productNavType
+import com.example.oshopping.ui.feature.cart.CartScreen
 import com.example.oshopping.ui.feature.home.HomeScreen
 import com.example.oshopping.ui.feature.product_details.ProductDetailScreen
 import com.example.oshopping.ui.theme.OShoppingTheme
@@ -85,19 +86,14 @@ class MainActivity : ComponentActivity() {
 
                             composable<CartScreen> {
 
-                                Box(modifier = Modifier.fillMaxSize()){
-                                    Text(text = "Cart")
-                                }
-
                                 shouldShowBottomBar.value = true
+
+                                CartScreen(navController)
+
 
                             }
 
                             composable<ProfileScreen> {
-
-                                Box(modifier = Modifier.fillMaxSize()){
-                                    Text(text = "Cart")
-                                }
 
                                 shouldShowBottomBar.value = true
 
@@ -186,11 +182,3 @@ sealed class BottomNavItems(val route: Any, val icon: Int, val label: String){
 
 }
 
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    OShoppingTheme {
-
-    }
-}

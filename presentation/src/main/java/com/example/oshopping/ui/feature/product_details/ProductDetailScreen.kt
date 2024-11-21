@@ -1,9 +1,11 @@
 package com.example.oshopping.ui.feature.product_details
 
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -17,12 +19,16 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.IconButtonColors
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -38,147 +44,202 @@ import com.example.oshopping.model.UiProductModel
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
-fun ProductDetailScreen(navController: NavController,
-                        product: UiProductModel,
-                        viewModel: ProductViewModel = koinViewModel()){
+fun ProductDetailScreen(
+    navController: NavController,
+    product: UiProductModel,
+    /*viewModel: ProductDetailsViewModel = koinViewModel()*/)
+{
 
+    val viewModel = koinViewModel<ProductDetailsViewModel>()
 
-
-    Column(modifier = Modifier.fillMaxSize()
-        .verticalScroll(rememberScrollState())) {
-
-        Box(modifier = Modifier.weight(1f)){
-
-            AsyncImage(model = product.image,
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
+    ) {
+        Box(
+            modifier = Modifier.weight(1f)
+        ) {
+            AsyncImage(
+                model = product.image,
                 contentDescription = null,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.fillMaxSize()
             )
 
-            Image(painter = painterResource(id = R.drawable.ic_back),
+            Image(
+                painter = painterResource(id = R.drawable.ic_back),
                 contentDescription = null,
-                modifier = Modifier.padding(16.dp)
-                    .clickable {
-
-                        navController.popBackStack()
-
-                    }
+                modifier = Modifier
+                    .padding(16.dp)
                     .size(48.dp)
+                    .clip(CircleShape)
+                    .background(Color.LightGray.copy(alpha = 0.4f))
+                    .padding(8.dp)
                     .align(Alignment.TopStart)
-                    .clip(CircleShape)
-                    .padding(8.dp)
-                    .background(Color.LightGray.copy(alpha = 0.4f))
             )
 
-            Image(painter = painterResource(id = R.drawable.ic_favorite),
+            Image(
+                painter = painterResource(id = R.drawable.ic_favorite),
                 contentDescription = null,
-                modifier = Modifier.padding(16.dp)
-                    .clickable {
-                        // Click operation handle
-                    }
+                modifier = Modifier
+                    .padding(16.dp)
                     .size(48.dp)
-                    .align(Alignment.TopEnd)
                     .clip(CircleShape)
-                    .padding(8.dp)
                     .background(Color.LightGray.copy(alpha = 0.4f))
+                    .padding(8.dp)
+                    .align(Alignment.TopEnd)
             )
+        }
+        Column(modifier = Modifier.fillMaxSize()) {
+            Row(modifier = Modifier.fillMaxWidth()) {
+                Text(
+                    text = product.title,
+                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
+                    modifier = Modifier
+                        .padding(16.dp)
+                        .weight(1f)
+                )
+                Text(
+                    text = "$${product.price}",
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier.padding(16.dp),
+                    color = MaterialTheme.colorScheme.primary
+                )
+            }
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Image(painter = painterResource(id = R.drawable.ic_star), contentDescription = null)
+                Spacer(modifier = Modifier.size(4.dp))
+                Text(
+                    text = "4.5",
+                    style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.SemiBold),
+                )
+                Spacer(modifier = Modifier.size(16.dp))
+                Text(
+                    text = "(10 Reviews)",
+                    style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.SemiBold),
+                    color = Color.Gray
+                )
+            }
+            Spacer(modifier = Modifier.size(16.dp))
+            Text(
+                text = "Description",
+                style = MaterialTheme.typography.titleMedium,
+                modifier = Modifier.padding(start = 16.dp)
+            )
+            Spacer(modifier = Modifier.size(8.dp))
+            Text(
+                text = product.description,
+                style = MaterialTheme.typography.bodySmall,
+                minLines = 3,
+                maxLines = 6,
+                modifier = Modifier.padding(horizontal = 16.dp),
+                color = Color.Gray
+            )
+            Spacer(modifier = Modifier.size(16.dp))
+            Text(
+                text = "Size",
+                style = MaterialTheme.typography.titleMedium,
+                modifier = Modifier.padding(start = 16.dp)
+            )
+            Spacer(modifier = Modifier.size(8.dp))
+            Row(modifier = Modifier.padding(horizontal = 16.dp)) {
+                repeat(4) {
+                    SizeItem(size = "${it + 1}", isSelected = it == 0) {}
+                }
+            }
+            Spacer(modifier = Modifier.size(16.dp))
+            Row(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 16.dp)
+            ) {
+                Button(
+                    onClick = { viewModel.addProductToCart(product) },
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Text(text = "Buy Now")
+                }
+                Spacer(modifier = Modifier.size(8.dp))
+                IconButton(
+                    onClick = { viewModel.addProductToCart(product) },
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                    colors = IconButtonDefaults.iconButtonColors()
+                        .copy(containerColor = Color.LightGray.copy(alpha = 0.4f))
+                ) {
+                    Image(
+                        painter = painterResource(id = R.drawable.ic_bag),
+                        contentDescription = null
+                    )
+                }
+            }
+
+        }
+    }
+
+    Box(modifier = Modifier.fillMaxSize()){
+
+        val uiState = viewModel.eventState.collectAsState()
+
+        val loading = remember {
+
+            mutableStateOf(false)
 
         }
 
-        Column(modifier = Modifier.fillMaxSize()) {
+        when(uiState.value){
 
-            Row(modifier = Modifier.fillMaxWidth()) {
+            is ProductDetailEvent.Error -> {
 
-                Text(
-                    text = product.title,
-                    modifier = Modifier.padding(16.dp).weight(1f),
-                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold)
-                )
+                loading.value = false
 
-                Text(
-                    text = "$ ${product.price}",
-                    modifier = Modifier.padding(16.dp),
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.primary
-                )
+                Toast.makeText(
+                    navController.context,
+                    (uiState.value as ProductDetailEvent.Error).message,
+                    Toast.LENGTH_LONG
+                ).show()
+                loading.value = false
+            }
+
+            is ProductDetailEvent.Loading -> {
+
+                loading.value = true
 
             }
 
-            Row(modifier = Modifier.fillMaxWidth()
-                .padding(horizontal = 16.dp),
-                verticalAlignment = Alignment.CenterVertically) {
+            is ProductDetailEvent.Nothing -> {
 
-                Image(painter = painterResource(id = R.drawable.ic_star),
-                    contentDescription = null)
-
-                Spacer(modifier = Modifier.size(4.dp))
-
-                Text(text = "4.5",
-                    style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.SemiBold))
-
-                Spacer(modifier = Modifier.size(16.dp))
-
-                Text(text = "(100 Reviews)",
-                    style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.SemiBold),
-                    color = Color.Gray)
-
+                loading.value = false
 
             }
 
-            Spacer(modifier = Modifier.size(16.dp))
+            is ProductDetailEvent.Success -> {
 
-            Text(text = "Description",
-                modifier = Modifier.padding(start = 16.dp),
-                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold))
-
-            Spacer(modifier = Modifier.size(8.dp))
-
-            Text(text = product.description,
-                style = MaterialTheme.typography.bodySmall,
-                modifier = Modifier.padding(horizontal = 16.dp),
-                minLines = 3,
-                maxLines = 5,
-                color = Color.Gray)
-
-            Spacer(modifier = Modifier.size(16.dp))
-
-            Text(text = "Size",
-                modifier = Modifier.padding(start = 16.dp),
-                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold))
-
-            Spacer(modifier = Modifier.size(8.dp))
-
-            Row(modifier = Modifier.padding(horizontal = 16.dp)) {
-
-                repeat(4){
-
-                    SizeItem(size = it.toString(), isSelected = it == 0, onClick = {})
-
-                }
+                loading.value = false
+                Toast.makeText(
+                    navController.context,
+                    (uiState.value as ProductDetailEvent.Success).message,
+                    Toast.LENGTH_LONG
+                ).show()
 
             }
 
-            Spacer(modifier = Modifier.size(16.dp))
+        }
 
-            Row(modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp)){
+        if (loading.value){
 
-                Button(onClick = { /*TODO*/ }, modifier = Modifier.weight(1f)) {
+            Column(modifier = Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.7f)),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center) {
 
-                    Text(text = "Add to Cart")
+                CircularProgressIndicator()
 
-                }
-
-                Spacer(modifier = Modifier.size(8.dp))
-
-                IconButton(onClick = { /*TODO*/ },
-                    modifier = Modifier.padding(horizontal = 16.dp),
-                    colors = IconButtonDefaults.iconButtonColors(
-                        containerColor = Color.LightGray.copy(alpha = 0.4f))
-                ) {
-
-                    Image(painter = painterResource(id = R.drawable.ic_bag),contentDescription = null)
-
-                }
+                Text(text = "Adding to cart", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onPrimary)
 
             }
 
@@ -196,21 +257,17 @@ fun SizeItem(size: String, isSelected: Boolean, onClick: () -> Unit){
         .size(48.dp)
         .clip(RoundedCornerShape(8.dp))
         .border(
-            width = 1.dp,
-            color = if (isSelected) MaterialTheme.colorScheme.primary else Color.LightGray,
-            shape = RoundedCornerShape(8.dp)
+            width = 1.dp, color = Color.Gray, shape = RoundedCornerShape(8.dp)
         )
-        .background(if (isSelected) MaterialTheme.colorScheme.primary else Color.Transparent)
-        .clickable {
-            onClick()
-        }){
-
+        .background(
+            if (isSelected) MaterialTheme.colorScheme.primary else Color.Transparent
+        )
+        .padding(8.dp)
+        .clickable { onClick() }) {
         Text(
             text = size,
-            modifier = Modifier.align(Alignment.Center),
-            style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.SemiBold),
-            color = if (isSelected) Color.White else Color.Black
+            style = MaterialTheme.typography.bodySmall,
+            modifier = Modifier.align(Alignment.Center)
         )
-
     }
 }

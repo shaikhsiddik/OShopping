@@ -9,6 +9,7 @@ import org.koin.core.context.startKoin
 
 class OShopperApp : Application() {
 
+
     override fun onCreate() {
         super.onCreate()
 
