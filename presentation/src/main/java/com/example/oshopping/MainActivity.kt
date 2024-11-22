@@ -38,11 +38,15 @@ import com.example.oshopping.navigation.CartSummaryScreen
 import com.example.oshopping.navigation.HomeScreen
 import com.example.oshopping.navigation.ProductDetailScreen
 import com.example.oshopping.navigation.ProfileScreen
+import com.example.oshopping.navigation.UserAddressRoute
+import com.example.oshopping.navigation.UserAddressRouteWrapper
 import com.example.oshopping.navigation.productNavType
+import com.example.oshopping.navigation.userAddressNavType
 import com.example.oshopping.ui.feature.cart.CartScreen
 import com.example.oshopping.ui.feature.home.HomeScreen
 import com.example.oshopping.ui.feature.product_details.ProductDetailScreen
 import com.example.oshopping.ui.feature.summary.CartSummaryScreen
+import com.example.oshopping.ui.feature.user_address.UserAddressScreen
 import com.example.oshopping.ui.theme.OShoppingTheme
 import kotlin.reflect.typeOf
 
@@ -119,6 +123,17 @@ class MainActivity : ComponentActivity() {
 
                                 ProductDetailScreen(navController, productRoute.product)
 
+                            }
+
+                            composable<UserAddressRoute>(
+                                typeMap = mapOf(typeOf<UserAddressRouteWrapper>() to userAddressNavType)
+                            ) {
+                                shouldShowBottomBar.value = false
+                                val userAddressRoute = it.toRoute<UserAddressRoute>()
+                                UserAddressScreen(
+                                    navController = navController,
+                                    userAddress = userAddressRoute.userAddressWrapper.userAddress
+                                )
                             }
 
                         }

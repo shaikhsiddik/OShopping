@@ -100,6 +100,8 @@ dependencies {
     androidTestImplementation(libs.androidx.runner)
     androidTestImplementation(libs.kotlinx.coroutines.test)
     implementation(libs.androidx.tracing)
+    implementation(libs.kotlin.serialization.json)
+
 
 
 }

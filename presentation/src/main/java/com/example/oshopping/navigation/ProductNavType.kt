@@ -1,6 +1,5 @@
 package com.example.oshopping.navigation
 
-import android.annotation.SuppressLint
 import android.os.Build
 import android.os.Bundle
 import androidx.navigation.NavType

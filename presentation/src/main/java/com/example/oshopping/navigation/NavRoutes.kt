@@ -17,5 +17,8 @@ object ProfileScreen
 object CartSummaryScreen
 
 @Serializable
+data class UserAddressRoute(val userAddressWrapper: UserAddressRouteWrapper)
+
+@Serializable
 data class ProductDetailScreen(val product: UiProductModel)
 
